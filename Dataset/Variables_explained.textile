@@ -1,0 +1,27 @@
+Name: Name of deceased
+Announcement: Date of death announcement on newspaper
+Date: Date of death
+Burial Day: Day of the week for burial
+Gender: Female or male
+Age: Age at death 
+Colour: Whether obituary was coloured or black and white (yes/no) 
+Size: Area of obituary (length x width) 
+Word Count: Number of words used in obituary 
+No of Children: Number of children the deceased had 
+Significant Children: Number of children of deceased that work 
+Fundraising: Whether the obituary explicitly requested for fund-raising (yes/no) 
+Death to Announce: Time in days between death to announcement on newspaper 
+Death to Burial: Time in days between death and burial Announce to 
+Burial: Time in days between between announcement of death and burial 
+No of relatives: Number of relatives mentioned on the obituary 
+County Burial: County where deceased would be buried 
+County Death: County where deceased passed on 
+County Morgue: County where body of deceased was held before burial 
+Distance Death: Distance in kilometres between county of death and county of burial 
+Distance Morgue:  Distance in kilometres between county of death and county where body is held 
+Cause of Death: Cause of death as indicated on obituary 
+Married: Whether deceased is married (yes/no) 
+Spouse Alive: Whether the deceased’s spouse is alive (yes/no) 
+Spouse Gender: Gender of spouse (female/male) 
+Hospital: Name of hospital where deceased was treated (applies to death due to illness) 
+Morgue: Name of morgue where body of decease was held
