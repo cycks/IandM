@@ -11,8 +11,8 @@ No of Children: Number of children the deceased had
 Significant Children: Number of children of deceased that work 
 Fundraising: Whether the obituary explicitly requested for fund-raising (yes/no) 
 Death to Announce: Time in days between death to announcement on newspaper 
-Death to Burial: Time in days between death and burial Announce to 
-Burial: Time in days between between announcement of death and burial 
+Death to Burial: Time in days between death and burial 
+Announce to Burial: Time in days between between announcement of death and burial 
 No of relatives: Number of relatives mentioned on the obituary 
 County Burial: County where deceased would be buried 
 County Death: County where deceased passed on 
