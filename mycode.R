@@ -33,7 +33,7 @@ Obituaries$Color <- ifelse(Obituaries$Color == "YES", 1, 0)
 
 # 3. Fund Raising
 table(Obituaries$Fundraising)
-Obituaries$Fundraising <- ifelse(Obituaries$Fundraising == "Yes", 1, 0)
+# Obituaries$Fundraising <- ifelse(Obituaries$Fundraising == "Yes", 1, 0)
 
 # 4. Spouse Alive
 table(Obituaries$Spouse_Alive)
@@ -54,6 +54,12 @@ Obituaries1 <- dplyr::filter(Obituaries,
 table(Obituaries1$Status)
 Obituaries1$SurvObj <- with(Obituaries1, Surv(Death_to_Burial, Status == 2))
 
-km.by.fundraising <- survfit(SurvObj ~ Fundraising, data = Obituaries1, conf.type = "log-log")
-km.by.fundraising
-ggsurv(km.by.fundraising)
+km.by.fundraising <- survfit(Surv(Death_to_Burial, Status)~ Fundraising, data = Obituaries1)
+
+kmplot <- ggsurv(km.by.fundraising)+
+            ggtitle("Kaplan-meier survival curve of Fund raising")+
+            xlab("Time in days between death and burial")+
+            geom_ribbon(aes(ymin=low,ymax=up,fill=group),alpha=0.3) +
+            guides(fill=FALSE) +
+            coord_cartesian(xlim = c(-3, 20)) 
+ggplotly(kmplot)
