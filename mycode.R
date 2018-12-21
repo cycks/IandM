@@ -33,7 +33,7 @@ Obituaries$Color <- ifelse(Obituaries$Color == "YES", 1, 0)
 
 # 3. Fund Raising
 table(Obituaries$Fundraising)
-# Obituaries$Fundraising <- ifelse(Obituaries$Fundraising == "Yes", 1, 0)
+#Obituaries$Fundraising <- ifelse(Obituaries$Fundraising == "Yes", 1, 0)
 
 # 4. Spouse Alive
 table(Obituaries$Spouse_Alive)
@@ -84,24 +84,25 @@ Obituaries1 <- dplyr::filter(Obituaries,
                 dplyr::mutate(Status = case_when(.$Death_to_Burial == -2 ~ 1,
                                                  .$Death_to_Burial > 0 ~ 2))
 table(Obituaries1$Status)
-Obituaries$Death_to_Burial <- as.numeric(Obituaries$Death_to_Burial)
-km.by.fundraising <- survfit(Surv(Death_to_Burial, Status)~ Fundraising, data = Obituaries1)
+Obituaries1$Death_to_Burial <- as.numeric(Obituaries1$Death_to_Burial)
+km.by.fundraising <- survfit(Surv(Death_to_Burial, Status)~ Fundraising,
+                             data = Obituaries1)
 # Create curve of Gender and time between death and burial
 kmplot <- ggsurv(km.by.fundraising)+
-            ggtitle("Kaplan-meier survival curve of Fund raising")+
-            xlab("Time in days between death and burial")+
-            geom_ribbon(aes(ymin=low,ymax=up,fill=group),alpha=0.3) +
-            guides(fill=FALSE) +
-            coord_cartesian(xlim = c(-3, 20)) 
-ggplotly(kmplot)
+  geom_ribbon(aes(ymin=low,ymax=up,fill=group),alpha=0.3) +
+  ggtitle("Kaplan-meier survival curve of Fund raising")+
+  xlab("Time in days between death and burial")+
+  guides(fill=FALSE) +
+  coord_cartesian(xlim = c(-3, 20)) 
+ggplotly(kmplot) 
 
+# Recode fundraising 
+Obituaries$Fundraising <- ifelse(Obituaries$Fundraising == "Yes", 1, 0)
 ##########################################################
 # some columns have too many missing values so we drop columns where the missing value
 # is more than 40%
 Obituaries3 <- as.data.frame(Obituaries[, -which(colMeans(is.na(Obituaries)) > 0.4)])
 
-#Recode obituaries3 fundraising into dummyvariable
-Obituaries3$Fundraising <- ifelse(Obituaries3$Fundraising == "Yes", 1, 0)
 #check fundraising is balanced
 table(Obituaries3$Fundraising) #the data set is almost balanced
 #Check types of variables
@@ -164,6 +165,7 @@ Obituaries3 <- Obituaries3%>%
 
 str(Obituaries3)
 
+
 # Drop the Morgue column too many observations to clean on time
 Obituaries3 <- dplyr::select(Obituaries3, -c(Morgue))
 names(Obituaries3)
@@ -173,13 +175,15 @@ names(Obituaries3)
 Obituaries3 <- Obituaries3[!is.na(Obituaries3$Announcement),]
 Obituaries3 <- Obituaries3[!is.na(Obituaries3$Death),]
 Obituaries3 <- Obituaries3[!is.na(Obituaries3$Burial),]
-dim(Obituaries3)
+names(Obituaries3)
 
 #impute missing values using package mice on non-date variables.
 names(Obituaries3[4:24])
-Obituaries3_impute <- mice(Obituaries3[4:24], m=5, maxit = 50, method = 'pmm', seed = 500)
+Obituaries3_impute <- mice(Obituaries3[4:24],
+                           m=5, maxit = 50, method = 'pmm', seed = 500)
 #Extract imputed data from Obituaries3_impute
 completedData <- complete(Obituaries3_impute,1)
+is.na(completedData)
 
 # merge date columns after imputing values in other columns
 Obituaries3 <-cbind.data.frame(Obituaries3[,1:3], completedData)
@@ -191,43 +195,61 @@ write.csv(Obituaries3, file = "Dataset/CleanData.csv")
 #Split data set into training and test set
 CleanData <- read_csv("Dataset/CleanData.csv")
 names(CleanData)
-# Drop variable X1
-CleanData <- dplyr::select(CleanData, -c(X1))
+any(is.na(CleanData))
+# Drop variable X1 and other insignificant variables 
+CleanData <- dplyr::select(CleanData, -c(X1, Burial_Day, Burial_Week,
+                                         Gender, Color, No_of_Children,
+                                         Significant_Children, No_of_Relatives,
+                                         County_Burial, Cause_of_Death, Married,
+                                         Spouse_Alive, Spouse_gender))
 
 set.seed(113)
 
 cutoff <- createDataPartition(CleanData$Fundraising, p = 0.75, list = FALSE)
-# Separate target variable
-target <- dplyr::select(CleanData, c(Fundraising))
-CleanData <- dplyr::select(CleanData, -c(Fundraising))
 
+sapply(train[, 4:12], class)
 # Remove near zero variance predictors
 variances<-apply(CleanData, 2, var)
 variances[which(variances<=0.0025)]
-variances
-# split target
-str(train)
+variances # no nearzero variance predictors
+
+## Convert Response variable to factor becuase it is a clasification problem
+CleanData$Fundraising <- as.factor(CleanData$Fundraising)
+levels(CleanData$Fundraising) <- c("No", "Yes")
+class(CleanData$Fundraising)
+
+# split into train and test set
 train <- CleanData[cutoff,]
 test <- CleanData[-cutoff,]
-
-# spllit target
-train_target <- target[cutoff,]
-test_target <- target[-cutoff,]
+names(train)
 
 # Remove Multicollinearity
 ncol(train)
-descrCorr <- cor(train[,4:23])
+descrCorr <- cor(train[,4:11])
 highCorr <- findCorrelation(descrCorr, 0.90)
 if (length(highCorr) != 0){
   train <- train[, -highCorr]
   test <- test[, -highCorr]
 }
 
+
+
 #####################################################
 # Tune Model
-gbmGrid <-  expand.grid(interaction.depth = 3,
-                        n.trees = c(200, 198, 202),
-                        shrinkage = 0.01,
-                        n.minobsinnode = c(33, 35, 34))
 
-nrow(gbmGrid)
+set.seed(113)
+gbmModel<- train(Fundraising~., data = train, method = "rpart",
+                  metric = "ROC",
+                  trControl= trainControl(method = "repeatedcv",
+                                          number = 10,
+                                          classProbs = TRUE,
+                                          summaryFunction=prSummary,
+                                          verboseIter = FALSE,
+                                          allowParallel = TRUE))
+summary(gbmModel)
+ggplot(gbmModel) + theme(legend.position = "top")
+
+
+make_prediction <- predict.train(gbmModel, newdata = test, type = "raw")
+make_prediction
+confusionMatrix(make_prediction, test$Fundraising)
