@@ -16,3 +16,12 @@ Set the working directory to the directory containing the cloned repository by e
 line in the mycode.R. file i.e. edit the line `setwd("E:/projects/I and M bank")` to reflect your current
 working directory. 
 
+Note that survival anlysis is interested in the time to event. Since our data set is only made of
+dead people our time to event will be the period between death and burial. Where death marks the 
+onset of the study and burial marks the event of interest.
+
+Running the code upto line 97 produces the plot below
+![alt text](https://github.com/cycks/IandM/blob/develop/Outputs/kmplot.png)
+
+
+
