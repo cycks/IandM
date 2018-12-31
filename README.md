@@ -32,7 +32,7 @@ longer than those who do not before they can be buried.
 ## Classifying Fund raising
 I decided to develop a model that could classify an individual's ability to request for fund raising
 based on a set of selected features. The stochastic gradient boosting was used to select important features
-before rpart was used to fit the model. The model makes the classification up to a 67% accuracy.
+before rpart was used to fit the model. The model has a 67% accuracy.
 
 ## Author
 Wycliffe Atswenje Sikolia
